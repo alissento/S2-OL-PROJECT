@@ -11,7 +11,7 @@ resource "aws_vpc" "WordpressVPC" {
   }
 }
 
-# Two web app subnets for our wordpress instances
+# Two web app subnets for our wordpress instances feeffefe
 resource "aws_subnet" "WEBAPP-1A" {
   vpc_id = aws_vpc.WordpressVPC.id
   cidr_block = "10.10.0.0/24"
