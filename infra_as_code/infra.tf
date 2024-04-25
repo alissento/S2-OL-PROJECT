@@ -73,3 +73,17 @@ resource "aws_subnet" "DB-1B" {
     Name = "DB-1B"
   }
 }
+
+resource "aws_internet_gateway" "wordpressIG" {
+  vpc_id = aws_vpc.WordpressVPC.id
+  tags = {
+    Name = "wordpressIG"
+  }
+  
+}
+
+# resource "aws_security_group" "webappSG" {
+#   ingress = {
+#     to_port = 
+#   }
+# }
