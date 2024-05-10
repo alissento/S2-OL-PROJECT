@@ -1,3 +1,4 @@
+# Creation of EFS file system and 2 mount targets in different subnets
 resource "aws_efs_file_system" "wordpressEFS" {
   creation_token = "wordpressEFSToken"
 
