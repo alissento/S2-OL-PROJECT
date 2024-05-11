@@ -5,7 +5,7 @@ provider "aws" {
 # Creating a VPC for our whole infrastructure
 resource "aws_vpc" "WordpressVPC" {
   cidr_block = "10.10.0.0/21"
-
+  enable_dns_hostnames = true
   tags = {
     Name = "wordpressVPC"
   }
@@ -111,9 +111,9 @@ resource "aws_route_table_association" "webapp_routetable_association_webapp_b" 
 
 # Security group settings for wordpress servers
 resource "aws_security_group" "webappSG" {
-  name        = "webappSG"
+  name = "webappSG"
   description = "Allow SSH and HTTP traffic for webserver"
-  vpc_id      = aws_vpc.WordpressVPC.id
+  vpc_id = aws_vpc.WordpressVPC.id
 
   tags = {
     Name = "webappSG"
@@ -122,22 +122,71 @@ resource "aws_security_group" "webappSG" {
 
 resource "aws_vpc_security_group_ingress_rule" "allow_ssh" {
   security_group_id = aws_security_group.webappSG.id
-  cidr_ipv4         = "3.120.181.40/29"
-  from_port         = 22
-  ip_protocol       = "tcp"
-  to_port           = 22
+  cidr_ipv4 = "3.120.181.40/29"
+  from_port = 22
+  ip_protocol = "tcp"
+  to_port = 22
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_http" {
   security_group_id = aws_security_group.webappSG.id
-  cidr_ipv4         = "0.0.0.0/0"
-  from_port         = 80
-  ip_protocol       = "tcp"
-  to_port           = 80
+  cidr_ipv4 = "0.0.0.0/0"
+  from_port = 80
+  ip_protocol = "tcp"
+  to_port = 80
 }
 
-resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
+resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_wordpress" {
   security_group_id = aws_security_group.webappSG.id
-  cidr_ipv4         = "0.0.0.0/0"
-  ip_protocol       = "-1"
+  cidr_ipv4 = "0.0.0.0/0"
+  ip_protocol = "-1"
+}
+
+# Security group settings for RDS databases
+resource "aws_security_group" "rdsSG" {
+  name = "rdsSG"
+  description = "Allow connection to rds dbs"
+  vpc_id = aws_vpc.WordpressVPC.id
+
+  tags = {
+    Name = "rdsSG"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_db_port" {
+  security_group_id = aws_security_group.rdsSG.id
+  cidr_ipv4 = aws_vpc.WordpressVPC.cidr_block
+  from_port = 3306
+  ip_protocol = "tcp"
+  to_port = 3306
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_rds" {
+  security_group_id = aws_security_group.rdsSG.id
+  cidr_ipv4 = "0.0.0.0/0"
+  ip_protocol = "-1"
+}
+
+resource "aws_security_group" "efsSG" {
+  name = "efsSG"
+  description = "Allow connection to efs"
+  vpc_id = aws_vpc.WordpressVPC.id
+
+  tags = {
+    Name = "efsSG"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_nfs_port" {
+  security_group_id = aws_security_group.efsSG.id
+  cidr_ipv4 = aws_vpc.WordpressVPC.cidr_block
+  from_port = 2049
+  ip_protocol = "tcp"
+  to_port = 2049
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_efs" {
+  security_group_id = aws_security_group.efsSG.id
+  cidr_ipv4 = "0.0.0.0/0"
+  ip_protocol = "-1"
 }
