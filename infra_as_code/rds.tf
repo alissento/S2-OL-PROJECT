@@ -13,6 +13,7 @@ resource "aws_db_instance" "wordpressRDS" {
   password = "adminadmin"
   parameter_group_name = "default.mysql8.0"
   skip_final_snapshot = true
+  multi_az = true
   db_subnet_group_name = aws_db_subnet_group.rdsSubnetGroup.name
   vpc_security_group_ids = [aws_security_group.rdsSG.id]
 }

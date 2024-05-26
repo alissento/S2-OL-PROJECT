@@ -19,6 +19,7 @@ resource "aws_launch_template" "wordpressServer" {
                 sudo su -
                 sudo mkdir -p /var/www/html/wp-content
                 sudo chown -R ec2-user:apache /var/www/
+                sudo chmod -R 0775 /var/www/html/wp-content/
                 sudo echo -e "${aws_efs_file_system.wordpressEFS.dns_name}:/ /var/www/html/wp-content efs _netdev,tls,iam 0 0" >> /etc/fstab
                 sudo mount -a -t efs defaults
 
@@ -112,14 +113,14 @@ resource "aws_cloudwatch_metric_alarm" "cpu_alarm_low" {
 }
 
 resource "aws_lb" "wordpressLoadBalancer" {
-  name = "test"
+  name = "wordpressALB"
   internal = false
   load_balancer_type = "application"
-  security_groups = [aws_security_group.webappSG.id]
+  security_groups = [aws_security_group.albSG.id]
   subnets = [aws_subnet.WEBAPP-1A.id, aws_subnet.WEBAPP-1B.id ]
   
   tags = {
-    Name = "testLB"
+    Name = "wordpressALB"
   }
 }
 

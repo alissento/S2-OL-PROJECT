@@ -190,3 +190,27 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_efs" {
   cidr_ipv4 = "0.0.0.0/0"
   ip_protocol = "-1"
 }
+
+resource "aws_security_group" "albSG" {
+  name = "albSG"
+  description = "Allow connection to alb"
+  vpc_id = aws_vpc.WordpressVPC.id
+
+  tags = {
+    Name = "albSG"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_http_port_alb" {
+  security_group_id = aws_security_group.albSG.id
+  cidr_ipv4 = "0.0.0.0/0"
+  from_port = 80
+  ip_protocol = "tcp"
+  to_port = 80
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_alb" {
+  security_group_id = aws_security_group.albSG.id
+  cidr_ipv4 = "0.0.0.0/0"
+  ip_protocol = "-1"
+}
