@@ -1,3 +1,4 @@
+# Lunch template for the Autoscaling group with all necessary user data
 resource "aws_launch_template" "wordpressServer" {
   name = "wordpressserver"
   image_id = "ami-098c93bd9d119c051"
@@ -35,7 +36,7 @@ resource "aws_launch_template" "wordpressServer" {
                 sudo sed -i "s/'password_here'/'${aws_db_instance.wordpressRDS.password}'/g" wp-config.php
                 sudo sed -i "s/'localhost'/'${aws_db_instance.wordpressRDS.endpoint}'/g" wp-config.php
 
-                sudo systemctl restart httpd  # Restart Apache
+                sudo systemctl restart httpd
 
               EOF
             )
@@ -48,6 +49,7 @@ resource "aws_launch_template" "wordpressServer" {
 
 } 
 
+# Autoscaling group for the wordpress servers
 resource "aws_autoscaling_group" "wordpressAutoScalingGroup" {
   name = "wordpressAutoScalingGroup"
   desired_capacity = 1
@@ -64,6 +66,8 @@ resource "aws_autoscaling_group" "wordpressAutoScalingGroup" {
 }
 
 
+# Scaling policies and cloud watch alarms necessary to have problem scaling of the websevers
+# stress -c 2 -v -t 3000 for testing purposes
 resource "aws_autoscaling_policy" "cpuScalingPolicy" {
   name = "cpuScalingPolicy"
   scaling_adjustment = 1
@@ -112,6 +116,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_alarm_low" {
   }
 }
 
+# Load balancer to provide high availability
 resource "aws_lb" "wordpressLoadBalancer" {
   name = "wordpressALB"
   internal = false
@@ -140,6 +145,7 @@ resource "aws_lb_target_group" "lbTargetGroup" {
   vpc_id = aws_vpc.WordpressVPC.id 
 }
 
+# IAM role and instance profile for the webserver to provide them necessary permissions
 resource "aws_iam_role" "wordpressRole" {
   name               = "wordpressRole"
   assume_role_policy = <<EOF

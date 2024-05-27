@@ -167,6 +167,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_rds" {
   ip_protocol = "-1"
 }
 
+# Security group settings for EFS storage
 resource "aws_security_group" "efsSG" {
   name = "efsSG"
   description = "Allow connection to efs"
@@ -191,6 +192,7 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4_efs" {
   ip_protocol = "-1"
 }
 
+# Security group settings for application load balancer
 resource "aws_security_group" "albSG" {
   name = "albSG"
   description = "Allow connection to alb"

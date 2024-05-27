@@ -1,5 +1,4 @@
-# TODO Create a simpel for now rds database just to see how it is working with terraform
-
+# Creating RDS instance with all necessary parameters
 resource "aws_db_instance" "wordpressRDS" {
   identifier = "wordpressrds"
   max_allocated_storage = 20
@@ -18,6 +17,7 @@ resource "aws_db_instance" "wordpressRDS" {
   vpc_security_group_ids = [aws_security_group.rdsSG.id]
 }
 
+# Subnet group for RDS
 resource "aws_db_subnet_group" "rdsSubnetGroup" {
   name = "mainsg"
   subnet_ids = [aws_subnet.DB-1A.id, aws_subnet.DB-1B.id]
