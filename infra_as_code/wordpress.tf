@@ -2,7 +2,7 @@
 resource "aws_launch_template" "wordpressServer" {
   name = "wordpressserver"
   image_id = "ami-098c93bd9d119c051"
-  instance_type = "t2.micro"
+  instance_type = "t3.micro"
   vpc_security_group_ids = [aws_security_group.webappSG.id]
 
   iam_instance_profile {
@@ -11,32 +11,32 @@ resource "aws_launch_template" "wordpressServer" {
 
   user_data = base64encode(<<-EOF
                 #!/bin/bash
-                sudo dnf -y update
-                sudo dnf install wget php-mysqlnd httpd php-fpm php-mysqli mariadb105-server php-json php php-devel stress amazon-efs-utils -y
+                dnf -y update
+                dnf install wget php-mysqlnd httpd php-fpm php-mysqli mariadb105-server php-json php php-devel stress amazon-efs-utils -y
 
-                sudo systemctl enable httpd
-                sudo systemctl start httpd
+                systemctl enable httpd
+                systemctl start httpd
 
-                sudo su -
-                sudo mkdir -p /var/www/html/wp-content
-                sudo chown -R ec2-user:apache /var/www/
-                sudo chmod -R 0775 /var/www/html/wp-content/
-                sudo echo -e "${aws_efs_file_system.wordpressEFS.dns_name}:/ /var/www/html/wp-content efs _netdev,tls,iam 0 0" >> /etc/fstab
-                sudo mount -a -t efs defaults
+                mkdir -p /var/www/html/wp-content
+                echo -e "${aws_efs_file_system.wordpressEFS.dns_name}:/ /var/www/html/wp-content efs _netdev,tls,iam 0 0" >> /etc/fstab
+                mount -a -t efs defaults
 
                 cd /var/www/html
-                sudo wget https://wordpress.org/latest.tar.gz
-                sudo tar -xzvf latest.tar.gz
-                sudo cp -r wordpress/* .
-                sudo rm -rf wordpress latest.tar.gz
+                wget https://wordpress.org/latest.tar.gz
+                tar -xzvf latest.tar.gz
+                cp -r wordpress/* .
+                rm -rf wordpress latest.tar.gz
 
-                sudo cp wp-config-sample.php wp-config.php
-                sudo sed -i "s/'database_name_here'/'${aws_db_instance.wordpressRDS.db_name}'/g" wp-config.php
-                sudo sed -i "s/'username_here'/'${aws_db_instance.wordpressRDS.username}'/g" wp-config.php
-                sudo sed -i "s/'password_here'/'${aws_db_instance.wordpressRDS.password}'/g" wp-config.php
-                sudo sed -i "s/'localhost'/'${aws_db_instance.wordpressRDS.endpoint}'/g" wp-config.php
+                cp wp-config-sample.php wp-config.php
+                sed -i "s/'database_name_here'/'${aws_db_instance.wordpressRDS.db_name}'/g" wp-config.php
+                sed -i "s/'username_here'/'${aws_db_instance.wordpressRDS.username}'/g" wp-config.php
+                sed -i "s/'password_here'/'${aws_db_instance.wordpressRDS.password}'/g" wp-config.php
+                sed -i "s/'localhost'/'${aws_db_instance.wordpressRDS.endpoint}'/g" wp-config.php
 
-                sudo systemctl restart httpd
+                chown -R ec2-user:apache /var/www/
+                chmod -R 0775 /var/www/html/wp-content/
+
+                systemctl restart httpd
 
               EOF
             )
