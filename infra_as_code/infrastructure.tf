@@ -1,3 +1,4 @@
+# Variable for a region specified by the user
 variable "target_region" {
   description = "Type a desired AWS region to deploy this project"
   type = string
@@ -8,6 +9,7 @@ variable "target_region" {
   }
 }
 
+# Extracting availability zones from user specified region
 data "aws_availability_zones" "azs" {
   state = "available"
 
@@ -17,6 +19,7 @@ data "aws_availability_zones" "azs" {
   }
 }
 
+# Creating an array that contains two avaibility zones of a user specified region
 locals {
   region_availability_zones = slice(data.aws_availability_zones.azs.names, 0, 2)
 }
@@ -25,7 +28,7 @@ provider "aws" {
   region = var.target_region
 }
 
-# Creating a VPC for our whole infrastructure
+# Creating a VPC for the whole infrastructure
 resource "aws_vpc" "WordpressVPC" {
   cidr_block = "10.10.0.0/21"
   enable_dns_hostnames = true

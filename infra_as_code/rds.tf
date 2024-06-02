@@ -1,3 +1,4 @@
+# Randomizing a password for the rds database
 resource "random_password" "db_password" {
   length           = 12
   special          = true

@@ -1,3 +1,4 @@
+# Extracting latest AMI of Amazon Linux 2023 
 data "aws_ami" "amazon_linux_2023" {
   most_recent = true
   owners = ["137112412989"]
