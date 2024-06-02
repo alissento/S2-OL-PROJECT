@@ -1,3 +1,9 @@
+resource "random_password" "db_password" {
+  length           = 12
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
 # Creating RDS instance with all necessary parameters
 resource "aws_db_instance" "wordpressRDS" {
   identifier = "wordpressrds"
@@ -9,7 +15,7 @@ resource "aws_db_instance" "wordpressRDS" {
   engine_version = "8.0"
   instance_class = "db.t3.micro"    
   username = "admin"
-  password = "adminadmin"
+  password = random_password.db_password.result
   parameter_group_name = "default.mysql8.0"
   skip_final_snapshot = true
   multi_az = true

@@ -1,7 +1,29 @@
+data "aws_ami" "amazon_linux_2023" {
+  most_recent = true
+  owners = ["137112412989"]
+  filter {
+    name = "name"
+    values = ["al2023-ami-2*-kernel-6.1-x86_64"]
+  }
+  filter {
+    name = "architecture"
+    values = ["x86_64"]
+  }
+  filter {
+    name = "root-device-type"
+    values = ["ebs"]
+  }
+  filter {
+    name = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+
 # Lunch template for the Autoscaling group with all necessary user data
 resource "aws_launch_template" "wordpressServer" {
   name = "wordpressserver"
-  image_id = "ami-098c93bd9d119c051"
+  image_id = data.aws_ami.amazon_linux_2023.id
   instance_type = "t3.micro"
   vpc_security_group_ids = [aws_security_group.webappSG.id]
 
@@ -175,12 +197,18 @@ resource "aws_iam_role" "wordpressRole" {
 }
 
 resource "aws_iam_instance_profile" "wordpressInstanceProfile" {
-  name = "example-ec2-instance-profile"
+  name = "WordpressInstanceProfile"
   role = aws_iam_role.wordpressRole.name
 }
 
-resource "aws_iam_policy_attachment" "wordpressPolicyAttachment" {
-  name       = "example-ec2-policy-attachment"
+resource "aws_iam_policy_attachment" "wordpressEFSPolicyAttachment" {
+  name       = "WordpressEFSPolicyAttachment"
   roles      = [aws_iam_role.wordpressRole.name]
   policy_arn = "arn:aws:iam::aws:policy/AmazonElasticFileSystemClientFullAccess"
+}
+
+resource "aws_iam_policy_attachment" "wordpressSSMPolicyAttachment" {
+  name       = "WordpressSSMPolicyAttachment"
+  roles      = [aws_iam_role.wordpressRole.name]
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }

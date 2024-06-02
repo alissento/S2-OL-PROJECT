@@ -1,5 +1,28 @@
+variable "target_region" {
+  description = "Type a desired AWS region to deploy this project"
+  type = string
+
+  validation {
+    condition = contains(["us-east-1", "us-east-2", "us-west-1", "us-west-2", "ca-central-1", "sa-east-1", "eu-central-1", "eu-west-1", "eu-west-2", "eu-west-3", "eu-north-1", "eu-north-1", "ap-southeast-1", "ap-southeast-2", "ap-northeast-1", "ap-northeast-2", "ap-northeast-3", "ap-south-1"], var.target_region)
+    error_message = "Invalid region. Allowed regions are: us-east-1, us-east-2, us-west-1, us-west-2, ca-central-1, sa-east-1, eu-central-1, eu-west-1, eu-west-2, eu-west-3, eu-north-1, ap-southeast-1, ap-southeast-2, ap-northeast-1, ap-northeast-2, ap-northeast-3, ap-south-1."
+  }
+}
+
+data "aws_availability_zones" "azs" {
+  state = "available"
+
+  filter {
+    name   = "region-name"
+    values = [var.target_region]
+  }
+}
+
+locals {
+  region_availability_zones = slice(data.aws_availability_zones.azs.names, 0, 2)
+}
+
 provider "aws" {
-  region = "eu-central-1"
+  region = var.target_region
 }
 
 # Creating a VPC for our whole infrastructure
@@ -15,7 +38,7 @@ resource "aws_vpc" "WordpressVPC" {
 resource "aws_subnet" "WEBAPP-1A" {
   vpc_id = aws_vpc.WordpressVPC.id
   cidr_block = "10.10.0.0/24"
-  availability_zone = "eu-central-1a"
+  availability_zone = local.region_availability_zones[0]
   map_public_ip_on_launch = true
 
   tags = {
@@ -26,7 +49,7 @@ resource "aws_subnet" "WEBAPP-1A" {
 resource "aws_subnet" "WEBAPP-1B" {
   vpc_id = aws_vpc.WordpressVPC.id
   cidr_block = "10.10.4.0/24"
-  availability_zone = "eu-central-1b"
+  availability_zone = local.region_availability_zones[1]
   map_public_ip_on_launch = true
 
   tags = {
@@ -38,7 +61,7 @@ resource "aws_subnet" "WEBAPP-1B" {
 resource "aws_subnet" "EFS-1A" {
   vpc_id = aws_vpc.WordpressVPC.id
   cidr_block = "10.10.1.0/24"
-  availability_zone = "eu-central-1a"
+  availability_zone = local.region_availability_zones[0]
 
   tags = {
     Name = "EFS-1A"
@@ -48,7 +71,7 @@ resource "aws_subnet" "EFS-1A" {
 resource "aws_subnet" "EFS-1B" {
   vpc_id = aws_vpc.WordpressVPC.id
   cidr_block = "10.10.5.0/24"
-  availability_zone = "eu-central-1b"
+  availability_zone = local.region_availability_zones[1]
 
   tags = {
     Name = "EFS-1B"
@@ -59,7 +82,7 @@ resource "aws_subnet" "EFS-1B" {
 resource "aws_subnet" "DB-1A" {
   vpc_id = aws_vpc.WordpressVPC.id
   cidr_block = "10.10.2.0/24"
-  availability_zone = "eu-central-1a"
+  availability_zone = local.region_availability_zones[0]
 
   tags = {
     Name = "DB-1A"
@@ -69,7 +92,7 @@ resource "aws_subnet" "DB-1A" {
 resource "aws_subnet" "DB-1B" {
   vpc_id = aws_vpc.WordpressVPC.id
   cidr_block = "10.10.6.0/24"
-  availability_zone = "eu-central-1b"
+  availability_zone = local.region_availability_zones[1]
 
   tags = {
     Name = "DB-1B"
@@ -119,15 +142,6 @@ resource "aws_security_group" "webappSG" {
     Name = "webappSG"
   }
 }
-
-resource "aws_vpc_security_group_ingress_rule" "allow_ssh" {
-  security_group_id = aws_security_group.webappSG.id
-  cidr_ipv4 = "3.120.181.40/29"
-  from_port = 22
-  ip_protocol = "tcp"
-  to_port = 22
-}
-
 resource "aws_vpc_security_group_ingress_rule" "allow_http" {
   security_group_id = aws_security_group.webappSG.id
   cidr_ipv4 = "0.0.0.0/0"
