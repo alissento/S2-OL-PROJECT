@@ -125,7 +125,7 @@ resource "aws_autoscaling_policy" "cpuDescalingPolicy" {
 
 resource "aws_cloudwatch_metric_alarm" "cpu_alarm_low" {
   alarm_name = "cpu-alarm-low"
-  alarm_description = "Alarm when load is lower than 75%"
+  alarm_description = "Alarm when load is lower than 25%"
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = 3
   metric_name = "CPUUtilization"
