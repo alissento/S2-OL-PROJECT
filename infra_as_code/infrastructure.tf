@@ -138,7 +138,7 @@ resource "aws_route_table_association" "webapp_routetable_association_webapp_b" 
 # Security group settings for wordpress servers
 resource "aws_security_group" "webappSG" {
   name = "webappSG"
-  description = "Allow SSH and HTTP traffic for webserver"
+  description = "Allow HTTP traffic for webserver"
   vpc_id = aws_vpc.WordpressVPC.id
 
   tags = {
