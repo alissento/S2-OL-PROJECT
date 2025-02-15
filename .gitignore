@@ -1,0 +1,6 @@
+/infra_as_code/.terraform/
+/infra_as_code/terraform.tfstate
+/infra_as_code/terraform.tfstate.backup
+/infra_as_code/terraform.tfvars
+/infra_as_code/terraform.tfvars.json
+/infra_as_code/.terraform.lock.hcl
